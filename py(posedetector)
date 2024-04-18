@@ -1,0 +1,41 @@
+import mediapipe as mp    #A library developed by Google for building applications with perception features, including pose detection.
+import cv2          # OpenCV, a popular computer vision library.
+mp_drawing = mp.solutions.drawing_utils    # Utility functions for drawing landmarks and connections on images.
+mp_holistic = mp.solutions.holistic        # pose detection model from MediaPipe.
+
+cap = cv2.VideoCapture(0)        #Opens the default camera (camera index 0).
+with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+    while cap.isOpened():     #Enters into a loop that continuously captures and processes video frames until the user presses 'q'.
+        ret, frame = cap.read()  #Reads a frame from the video capture.
+
+        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = holistic.process(image)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+        mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.HAND_CONNECTIONS,
+                                  mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
+                                  mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1)
+                                  )
+
+        mp_drawing.draw_landmarks(image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS,
+                                  mp_drawing.DrawingSpec(color=(80, 22, 10), thickness=2, circle_radius=4),
+                                  mp_drawing.DrawingSpec(color=(80, 44, 121), thickness=2, circle_radius=2)
+                                  )
+        
+        mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS,
+                                  mp_drawing.DrawingSpec(color=(121, 22, 76), thickness=2, circle_radius=4),
+                                  mp_drawing.DrawingSpec(color=(121, 44, 250), thickness=2, circle_radius=2)
+                                  )
+        
+        mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS,
+                                  mp_drawing.DrawingSpec(color=(245, 117, 66), thickness=2, circle_radius=4),
+                                  mp_drawing.DrawingSpec(color=(245, 66, 230), thickness=2, circle_radius=2)
+                                  )
+        
+        cv2.imshow('Img', image)
+
+        if cv2.waitKey(10) & 0xFF == ord('q'):   #If the user presses the 'q' key, the loop breaks.
+            break
+
+cap.release()    #Releases the video capture object and closes all OpenCV windows.
+cv2.destroyAllWindows()
